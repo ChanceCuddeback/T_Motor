@@ -5,14 +5,6 @@
 #include <ArduinoBLE.h>
 #include "Serial_CAN_Nano.h"
 
-<<<<<<< Updated upstream
-#include <ArduinoBLE.h>
-=======
-#define RED 22     
-#define BLUE 24     
-#define GREEN 23
->>>>>>> Stashed changes
-
 #define RED 22     
 #define BLUE 24     
 #define GREEN 23
@@ -57,11 +49,6 @@ void setup() {
   //can.baudRate('4'); //115200
   //can.canRate('18'); //1Mbps
   Serial.println("Begin!");
-<<<<<<< Updated upstream
-  //sendZero();
-  //ExitMotorMode();
-=======
->>>>>>> Stashed changes
   setupBLE();
 }
 

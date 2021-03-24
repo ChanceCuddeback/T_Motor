@@ -1,10 +1,5 @@
 #include "Serial_CAN_Nano.h"
 #include "TMotor.h"
-<<<<<<< Updated upstream
-//Serial_CAN can;
-=======
->>>>>>> Stashed changes
-
 
 TMotor::TMotor(int id) {
   this->id = id;
