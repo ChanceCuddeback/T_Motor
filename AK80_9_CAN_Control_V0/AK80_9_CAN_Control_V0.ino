@@ -2,8 +2,16 @@
  * Uses an Arduino Nano 33 BLE Sense and Seeed studios Serial-CAN transciever
  * t_ret = kp(p_des-p_real) + kd(V_des-V_real) + t_in
  */
-
 #include <ArduinoBLE.h>
+#include "Serial_CAN_Nano.h"
+
+<<<<<<< Updated upstream
+#include <ArduinoBLE.h>
+=======
+#define RED 22     
+#define BLUE 24     
+#define GREEN 23
+>>>>>>> Stashed changes
 
 #define RED 22     
 #define BLUE 24     
@@ -24,21 +32,20 @@
 // define motor vals
 float p_in = 0.0f;
 float v_in = 0.0f;
-float kp_in = 0.0f;  //100   10
+float kp_in = 100.0f;  //100   10
 float kd_in = 1.0f;  //1   10
 float t_in = 0.0f;
+
 // measured values
 float p_out = 0.0f;
 float v_out = 0.0f;
 float t_out = 0.0f;
 
-//Library
-#include "Serial_CAN_Nano.h"
 //CAN instance
 Serial_CAN can;
 
 long unsigned int can_id = 0x1;
-//Data buffer for CAN messages
+// buffer for CAN messages
 unsigned char data[8] = {1,2,3,4,5,6,7,8};
 int command = 0;
 bool motor_on = false;
@@ -50,8 +57,11 @@ void setup() {
   //can.baudRate('4'); //115200
   //can.canRate('18'); //1Mbps
   Serial.println("Begin!");
+<<<<<<< Updated upstream
   //sendZero();
   //ExitMotorMode();
+=======
+>>>>>>> Stashed changes
   setupBLE();
 }
 
