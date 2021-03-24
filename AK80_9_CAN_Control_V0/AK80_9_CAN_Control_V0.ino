@@ -3,7 +3,12 @@
  * t_ret = kp(p_des-p_real) + kd(V_des-V_real) + t_in
  */
 
+#include <ArduinoBLE.h>
 
+#define RED 22     
+#define BLUE 24     
+#define GREEN 23
+ 
 //Motor max/mins
 #define P_MIN -12.5f
 #define P_MAX 12.5f
@@ -41,16 +46,17 @@ bool motor_on = false;
 void setup() {
   Serial.begin(9600);
   can.begin(57600);
-  while (!Serial) {};
   delay(500);
   //can.baudRate('4'); //115200
   //can.canRate('18'); //1Mbps
   Serial.println("Begin!");
-  sendZero();
-  ExitMotorMode();
+  //sendZero();
+  //ExitMotorMode();
+  setupBLE();
 }
 
 void loop() {
+  BLE.poll();
   while (Serial.available()) {
     command = Serial.read();
     float p_step = 0.01;
