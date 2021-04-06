@@ -37,27 +37,31 @@ unsigned char Serial_CAN::recv(unsigned long *id, uchar *buf)
 {
     if(Serial1.available())
     {
+      //Serial.println("Serial available!");
         unsigned long timer_s = millis();
         
         int len = 0;
-        uchar dta[20];
-        
+        unsigned char dta[20];
+        while(true) {
             while(Serial1.available())
             {
                 dta[len++] = Serial1.read();
-                if(len == 12)
-                    break;
+                if(len == 12) {
+                  //Serial.println("Len is 12");
+                  break;
+                }
  
               if((millis()-timer_s) > 10)
                 {
-                  Serial.println("Timout Check1!");
+                  //Serial.println("Timout Check1!");
                   Serial1.flush();
                   return 0; // Reading 12 bytes should be faster than 10ms, abort if it takes longer, we loose the partial message in this case
                 }
             }
-            
+        
             if(len == 12) // Just to be sure, must be 12 here
             {
+                //Serial.println("In len == 12 if");
                 unsigned long __id = 0;
                 
                 for(int i=0; i<4; i++) // Store the id of the sender
@@ -65,8 +69,11 @@ unsigned char Serial_CAN::recv(unsigned long *id, uchar *buf)
                     __id <<= 8;
                     __id += dta[i];
                 }
+                //Serial.println("Done with first for loop!");
                 
-                *id = __id;
+                //*id = __id;
+                //Serial.print("ID: ");
+                //Serial.println(*id);
                 
                 for(int i=0; i<8; i++) // Store the message in the buffer
                 {
@@ -77,10 +84,11 @@ unsigned char Serial_CAN::recv(unsigned long *id, uchar *buf)
             
             if((millis()-timer_s) > 10)
             {
-                Serial.println("Timout Check 2!");
+                //Serial.println("Timout Check 2!");
                 Serial1.flush();
                 return 0; // Reading 12 bytes should be faster than 10ms, abort if it takes longer, we loose the partial message in this case
             }
+        }
     }
     return 0;
 }
@@ -152,8 +160,8 @@ unsigned char Serial_CAN::baudRate(unsigned char rate)
         
         if(cmdOk("AT\r\n"))
         {
-            Serial.print("SERIAL BAUD RATE IS: ");
-            Serial.println(baud[i]);
+            //Serial.print("SERIAL BAUD RATE IS: ");
+            //Serial.println(baud[i]);
             baudNow = i;
             break;     
         }
@@ -168,8 +176,8 @@ unsigned char Serial_CAN::baudRate(unsigned char rate)
     
     if(ret)
     {
-        Serial.print("Serial baudrate set to ");
-        Serial.println(baud[rate]);
+        //Serial.print("Serial baudrate set to ");
+        //Serial.println(baud[rate]);
     }
     
     exitSettingMode();
@@ -235,7 +243,7 @@ unsigned char Serial_CAN::setMask(unsigned long *dta)
     for(int i=0; i<2; i++)
     {
         make8zerochar(8, __str, dta[1+2*i]);
-        //Serial.println(__str);
+        ////Serial.println(__str);
         sprintf(str_tmp, "AT+M=[%d][%d][", i, dta[2*i]);
         for(int i=0; i<8; i++)
         {
@@ -246,7 +254,7 @@ unsigned char Serial_CAN::setMask(unsigned long *dta)
         str_tmp[22] = '\n';
         str_tmp[23] = '\0';
         
-        //Serial.println(str_tmp);
+        ////Serial.println(str_tmp);
         
         if(!cmdOk(str_tmp))
         {

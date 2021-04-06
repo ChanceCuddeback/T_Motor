@@ -1,17 +1,20 @@
 #include "TMotor.h"
-//Initializer
-TMotor::TMotor(long unsigned int id) {
+
+//Public interface
+void TMotor::init(unsigned long int id, bool zero) {
   this->id = id;
   sender = Serial_CAN();
   sender.begin(CAN_RATE);
+  if (zero) {
+    this->enableMotor(true);
+    this->setZero();
+  }
+  this->disableMotor();
 }
-//======================
-
-
-//Public interface
-void TMotor::handleReply(bool prin = false) {
-  if (sender.recv(&id, data) == '1') {
-    TMotor::unpack_reply(prin);
+void TMotor::handleReply(bool prin) {
+  if (sender.recv(&id, data) == 1) {
+    //Serial.println("Unpacking Reply!");
+    this->unpack_reply(prin);
   }
 }
 
@@ -35,38 +38,40 @@ void TMotor::disableMotor() {
 void TMotor::changeMode(int modeL) {
   this->mode = modeL;
   switch (mode) { //Change kp, kd
-    case (1): //Pos
+    case (0): //Pos
       kp = KP_DEF;
       kd = KD_DEF;
       break;
-    case (2): //Vel
+    case (1): //Vel
       kp = 0.0001;
       kd = KD_DEF;
       break;
-    case (3): //Tor
+    case (2): //Tor
       kp = 0.0001;
       kd = KD_DEF;
       break;
     default:
-      Serial.println("Unknown Mode!");
+      //Serial.println("Unknown Mode!");
+      break;
   }
 }
 
 void TMotor::setpoint(float point) {
-  float val = 0;
   switch (this->mode) { //Check the mode then assign a setpoint
-    case (1):
+    case (0):
       posTo = point;
       break;
-    case (2):
+    case (1):
       velTo = point;
       break;
-    case (3):
+    case (2):
       torTo = point;
       break;
     default:
-      Serial.println("Unknown Mode!");
+      break;
+      //Serial.println("Unknown Mode!");
   }
+  pack_cmd();
 }
 
 void  TMotor::setZero() {
@@ -75,8 +80,7 @@ void  TMotor::setZero() {
 }
 
 void  TMotor::tick() {
-  unsigned char zero_data[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE};
-  sender.send(id, 0, 0, 8, zero_data);
+  
 }
 
 void  TMotor::update() {
@@ -155,20 +159,26 @@ float TMotor::uint_to_float(unsigned int x_int, float x_min, float x_max, int bi
   return pgg;
  }
 
-void TMotor::unpack_reply(bool prin = false) {
+void TMotor::unpack_reply(bool prin) {
   //Unpack buffer
   unsigned int ID = data[0];
   unsigned int p_int = (data[1] << 8) | data[2];
   unsigned int v_int = (data[3] << 4) | (data[4] >> 4);
   unsigned int i_int = ((data[4] & 0xF) << 8) | data[5];
+  //Serial.println("Got data!");
   //Convert to floats
   this->posFrom = uint_to_float(p_int, P_MIN, P_MAX, 16);
   this->velFrom = uint_to_float(v_int, V_MIN, V_MAX, 12);
   this->torFrom = uint_to_float(i_int, -T_MAX, T_MAX, 12);
+  //Serial.println("Converted data!");
   if (prin) {
-    Serial.print(posFrom);
-    Serial.print(velFrom);
-    Serial.print(torFrom);
+    Serial.print("Position: ");
+    Serial.println(this->posFrom);
+    Serial.print("Velocity: ");
+    Serial.println(this->velFrom);
+    Serial.print("Torque: ");
+    Serial.println(this->torFrom);
+    //Serial.println("Done Printing!");
   }
 }
 //==================================

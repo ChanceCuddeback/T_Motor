@@ -1,7 +1,6 @@
 #ifndef BT_FUNCS_H
 #define BT_FUNCS_H
 
-#include<Arduino.h>
 #include<ArduinoBLE.h>
 
 
@@ -23,7 +22,7 @@ const char* motorCharUUID     = "12341234-1212-EFDE-1523-785FEABCD124";
 
 BLEService TMotorService(TMotorServiceUUID);
 BLEByteCharacteristic enableChar(enableCharUUID,        BLERead | BLEWrite | BLEBroadcast); 
-BLEDoubleCharacteristic setpointChar(setpointCharUUID,  BLERead | BLEWrite | BLEBroadcast);
+BLEFloatCharacteristic setpointChar(setpointCharUUID,  BLERead | BLEWrite | BLEBroadcast);
 BLEIntCharacteristic modeChar(modeCharUUID,             BLERead | BLEWrite | BLEBroadcast);
 BLEIntCharacteristic motorChar(motorCharUUID,           BLERead | BLEWrite | BLEBroadcast);
 

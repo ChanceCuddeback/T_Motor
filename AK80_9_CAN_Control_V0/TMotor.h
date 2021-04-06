@@ -16,17 +16,16 @@
 #define T_MAX 18.0f
 
 //Weigth Defaults
-#define KP_DEF 100.0f
-#define KD_DEF 10.0f
+#define KP_DEF 0.01f
+#define KD_DEF 0.01f
 
 
 #define CAN_RATE 57600
 
 class TMotor {
   public:
-    //Constructor
-    TMotor(long unsigned int);
     //Methods
+    void    init(unsigned long int id, bool zero);
     void    enableMotor(bool);
     void    disableMotor();
     void    changeMode(int);

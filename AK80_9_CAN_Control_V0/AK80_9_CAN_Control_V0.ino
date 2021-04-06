@@ -6,33 +6,47 @@
 #include"BTFuncs.h"
 #include"TMotor.h"
 
-#define LEFT_MOTOR_ID 1
-#define RIGHT_MOTOR_ID 2
+#define WAIT_TIME 50
+const long unsigned int LEFT_MOTOR_ID = 1;
+const long unsigned int RIGHT_MOTOR_ID = 2;
 
 //Global Vars to interface bluetooth and motor instances
-int bt_mode =       0;    //O: Position, 1: Velocity, 2: Torque
-int bt_motor =      0; 
+int bt_mode =       0;    //0: Position, 1: Velocity, 2: Torque
+int bt_motor =      0;    //0: Left, 1: Right 
 bool bt_enable =    0;
 float bt_setpoint = 0;
 
- //Global Motor Instance(s)
- TMotor left(LEFT_MOTOR_ID);
+
+//Time keeping
+unsigned long int startMillis;
+unsigned long int currentMillis;
+
+//Declare Global Motor Instance(s)
+TMotor left_motor = TMotor();
+//TMotor right_motor = TMotor();
 
 
 void setup() {
-  Serial.begin(9600);
-  delay(500);
-  Serial.println("Begin!");
+  Serial.begin(115200);
+  while (!Serial) {};
+  delay(1000);
+  //Serial.println("Begin!");
+  left_motor.init(LEFT_MOTOR_ID, true);
   setupBLE();
-  left.enableMotor(true);
+  //Serial.println("Done!");
+  startMillis = millis();
 }
+
 
 void loop() {
   BLE.poll();
-  if (bt_enable) {
-    left.enableMotor(true);
+  currentMillis = millis();
+  if (currentMillis - startMillis > WAIT_TIME) {
+    //Serial.println("Getting data from motor!");
+    left_motor.handleReply(true);
+    startMillis = currentMillis;
+    //Serial.println("Done getting Data!");
   }
- 
   /*
   while (Serial.available()) {
     command = Serial.read();
