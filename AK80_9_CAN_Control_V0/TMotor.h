@@ -1,6 +1,5 @@
 #ifndef TMOTORHEADER
 #define TMOTORHEADER
-#include "Serial_CAN_Nano.h"
 
 //Motor max/mins
 #define P_MIN -12.5f
@@ -14,39 +13,45 @@
 #define T_MIN -18.0f
 #define T_MAX 18.0f
 
+//Weigth Defaults
+#define KP_DEF 100.0f
+#define KD_DEF 10.0f
+
 class TMotor {
   public:
     //Constructor
-    TMotor(int);
+    TMotor(long unsigned int);
     //Methods
     void    enableMotor(bool);
     void    disableMotor();
     void    changeMode(int);
-    void    setpoint(double);
+    void    setpoint(float);
     void    setZero();
     void    tick();
     void    update();
-    void    handleReply();
+    void    handleReply(bool);
     //Getters/Setters
-    double  pos();
-    double  vel();
-    double  tor();
+    float   pos();
+    float   vel();
+    float   tor();
     bool    isEnabled();
   private:
     //Methods
     void    pack_cmd();
-    void    unpack_reply();
+    void    unpack_reply(bool);
     float   float_to_uint(float, float, float, int);
     float   uint_to_float(unsigned int, float, float, int);
     //Properties
-    int id;
-    int kp, kd;
+    long unsigned int id;
+    float kp{KP_DEF};
+    float kd{KD_DEF};
     bool enabled = false;
+    int mode;
     Serial_CAN sender;
     //Buffer for CAN
     unsigned char data[8] = {1,2,3,4,5,6,7,8};
-    double posTo, velTo, torTo;
-    double posFrom, velFrom, torFrom;
+    float posTo, velTo, torTo;
+    float posFrom, velFrom, torFrom;
 };
 
 #endif

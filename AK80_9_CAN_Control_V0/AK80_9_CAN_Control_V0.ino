@@ -171,7 +171,7 @@ void loop() {
       return false;
     }
     v_in = vel;
-    kp_in = 0;;
+    kp_in = 0;
     kd_in = kd;
     t_in = 0;
     pack_cmd();
