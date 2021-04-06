@@ -1,6 +1,8 @@
 #ifndef TMOTORHEADER
 #define TMOTORHEADER
 
+#include"Serial_CAN_Nano.h"
+
 //Motor max/mins
 #define P_MIN -12.5f
 #define P_MAX 12.5f
@@ -16,6 +18,9 @@
 //Weigth Defaults
 #define KP_DEF 100.0f
 #define KD_DEF 10.0f
+
+
+#define CAN_RATE 57600
 
 class TMotor {
   public:

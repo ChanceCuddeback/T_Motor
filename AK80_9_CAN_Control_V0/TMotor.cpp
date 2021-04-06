@@ -1,10 +1,9 @@
-#include "Serial_CAN_Nano.h"
 #include "TMotor.h"
 //Initializer
 TMotor::TMotor(long unsigned int id) {
   this->id = id;
   sender = Serial_CAN();
-  sender.begin(57600);
+  sender.begin(CAN_RATE);
 }
 //======================
 

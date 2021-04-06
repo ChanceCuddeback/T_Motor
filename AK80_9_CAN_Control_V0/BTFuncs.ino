@@ -1,15 +1,4 @@
-//Complete Bluetooth test
-const char* TMotorServiceUUID = "12341234-1212-EFDE-1523-785FEABCD120";
-const char* enableCharUUID    = "12341234-1212-EFDE-1523-785FEABCD121";
-const char* setpointCharUUID  = "12341234-1212-EFDE-1523-785FEABCD122";
-const char* modeCharUUID      = "12341234-1212-EFDE-1523-785FEABCD123";
-const char* motorCharUUID     = "12341234-1212-EFDE-1523-785FEABCD124";
-
-BLEService TMotorService(TMotorServiceUUID);
-BLEByteCharacteristic enableChar(enableCharUUID,        BLERead | BLEWrite | BLEBroadcast); 
-BLEDoubleCharacteristic setpointChar(setpointCharUUID,  BLERead | BLEWrite | BLEBroadcast);
-BLEIntCharacteristic modeChar(modeCharUUID,             BLERead | BLEWrite | BLEBroadcast);
-BLEIntCharacteristic motorChar(motorCharUUID,           BLERead | BLEWrite | BLEBroadcast);
+#include<ArduinoBLE.h>
 
 void setupBLE() {
   if (BLE.begin()) {
@@ -45,34 +34,39 @@ void onBLEConnected(BLEDevice central) {
   BLE.stopAdvertise();
   digitalWrite(BLUE, LOW);
 }
+
 void onBLEDisconnected(BLEDevice central) {
   Serial.print("Disconnected event, central: ");
   Serial.println(central.address());
   BLE.advertise();
   digitalWrite(BLUE, HIGH);
 }
+
 void enableWritten(BLEDevice central, BLECharacteristic characteristic) {
-  byte enable = enableChar.value();
+  bt_enable = enableChar.value();
   Serial.print("Enable written to: ");
-  Serial.println(enable);
-  if (enable) {
+  Serial.println(bt_enable);
+  if (bt_enable) {
     Serial.println("Enable");
   } else {
     Serial.println("Disable");
   }
 }
+
 void setpointWritten(BLEDevice central, BLECharacteristic characteristic) {
-  double setpoint = setpointChar.value();
+  bt_setpoint = setpointChar.value();
   Serial.print("Setpoint written to: ");
-  Serial.println(setpoint);
+  Serial.println(bt_setpoint);
 }
+
 void modeWritten(BLEDevice central, BLECharacteristic characteristic) {
-  int mode = modeChar.value();
+  bt_mode = modeChar.value();
   Serial.print("Mode written to: ");
-  Serial.println(mode);
+  Serial.println(bt_mode);
 }
+
 void motorWritten(BLEDevice central, BLECharacteristic characteristic) {
-  int motor = motorChar.value();
+  bt_motor = motorChar.value();
   Serial.print("Motor written to: ");
-  Serial.println(motor);
+  Serial.println(bt_motor);
 }

@@ -2,58 +2,38 @@
  * Uses an Arduino Nano 33 BLE Sense and Seeed studios Serial-CAN transciever
  * t_ret = kp(p_des-p_real) + kd(V_des-V_real) + t_in
  */
-#include <ArduinoBLE.h>
-#include "Serial_CAN_Nano.h"
-
-#define RED 22     
-#define BLUE 24     
-#define GREEN 23
  
-//Motor max/mins
-#define P_MIN -12.5f
-#define P_MAX 12.5f
-#define V_MIN -25.0f //-65.0f
-#define V_MAX 25.0f  //500.0f
-#define KP_MIN 0.0f
-#define KP_MAX 500.0f
-#define KD_MAX 5.0f
-#define KD_MIN 0.0f
-#define T_MIN -18.0f
-#define T_MAX 18.0f
+#include"BTFuncs.h"
+#include"TMotor.h"
 
-// define motor vals
-float p_in = 0.0f;
-float v_in = 0.0f;
-float kp_in = 100.0f;  //100   10
-float kd_in = 1.0f;  //1   10
-float t_in = 0.0f;
+#define LEFT_MOTOR_ID 1
+#define RIGHT_MOTOR_ID 2
 
-// measured values
-float p_out = 0.0f;
-float v_out = 0.0f;
-float t_out = 0.0f;
+//Global Vars to interface bluetooth and motor instances
+int bt_mode =       0;    //O: Position, 1: Velocity, 2: Torque
+int bt_motor =      0; 
+bool bt_enable =    0;
+float bt_setpoint = 0;
 
-//CAN instance
-Serial_CAN can;
+ //Global Motor Instance(s)
+ TMotor left(LEFT_MOTOR_ID);
 
-long unsigned int can_id = 0x1;
-// buffer for CAN messages
-unsigned char data[8] = {1,2,3,4,5,6,7,8};
-int command = 0;
-bool motor_on = false;
 
 void setup() {
   Serial.begin(9600);
-  can.begin(57600);
   delay(500);
-  //can.baudRate('4'); //115200
-  //can.canRate('18'); //1Mbps
   Serial.println("Begin!");
   setupBLE();
+  left.enableMotor(true);
 }
 
 void loop() {
   BLE.poll();
+  if (bt_enable) {
+    left.enableMotor(true);
+  }
+ 
+  /*
   while (Serial.available()) {
     command = Serial.read();
     float p_step = 0.01;
@@ -121,8 +101,9 @@ void loop() {
   if (can.recv(&can_id, data) == '1') {
     unpack_reply();
   }
+  */
 }
-
+  /*
   void EnterMotorMode()
   {
     unsigned char enable_data[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC};
@@ -264,5 +245,4 @@ void loop() {
   }
   return pgg;
  }
-  
-//END FILE
+ */
