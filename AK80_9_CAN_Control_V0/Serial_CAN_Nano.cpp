@@ -71,7 +71,7 @@ unsigned char Serial_CAN::recv(unsigned long *id, uchar *buf)
                 }
                 //Serial.println("Done with first for loop!");
                 
-                //*id = __id;
+                *id = __id;
                 //Serial.print("ID: ");
                 //Serial.println(*id);
                 

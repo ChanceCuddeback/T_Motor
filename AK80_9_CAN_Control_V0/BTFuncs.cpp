@@ -1,4 +1,20 @@
 #include<ArduinoBLE.h>
+#include"BTFuncs.h"
+#include"Globals.h"
+
+//Complete Bluetooth test
+const char* TMotorServiceUUID = "12341234-1212-EFDE-1523-785FEABCD120";
+const char* enableCharUUID    = "12341234-1212-EFDE-1523-785FEABCD121";
+const char* setpointCharUUID  = "12341234-1212-EFDE-1523-785FEABCD122";
+const char* modeCharUUID      = "12341234-1212-EFDE-1523-785FEABCD123";
+const char* motorCharUUID     = "12341234-1212-EFDE-1523-785FEABCD124";
+
+BLEService TMotorService(TMotorServiceUUID);
+BLEByteCharacteristic enableChar(enableCharUUID,        BLERead | BLEWrite | BLEBroadcast); 
+BLEFloatCharacteristic setpointChar(setpointCharUUID,  BLERead | BLEWrite | BLEBroadcast);
+BLEIntCharacteristic modeChar(modeCharUUID,             BLERead | BLEWrite | BLEBroadcast);
+BLEIntCharacteristic motorChar(motorCharUUID,           BLERead | BLEWrite | BLEBroadcast);
+
 
 void setupBLE() {
   if (BLE.begin()) {
@@ -49,10 +65,10 @@ void onBLEDisconnected(BLEDevice central) {
 }
 
 void enableWritten(BLEDevice central, BLECharacteristic characteristic) {
-  bt_enable = enableChar.value();
+  //bt_enable = enableChar.value();
   //Serial.print("Enable written to: ");
   //Serial.println(bt_enable);
-  
+  /*
   if (bt_motor == 0) {
     if (bt_enable) {
       //Serial.println("Left Enable");
@@ -70,37 +86,43 @@ void enableWritten(BLEDevice central, BLECharacteristic characteristic) {
       //right_motor.disableMotor();
     }
   }
+  */
 }
 
 void setpointWritten(BLEDevice central, BLECharacteristic characteristic) {
-  bt_setpoint = setpointChar.value();
+  //bt_setpoint = setpointChar.value();
   //Serial.print("Setpoint written to: ");
   //Serial.println(bt_setpoint);
+  /*
   if (bt_motor == 0) {
     left_motor.setpoint(bt_setpoint);
   } else if (bt_motor == 1) {
     //Serial.println("Right motor setpoint changed");
     //right_motor.setpoint(bt_setpoint);
   }
+  */
 }
 
 void modeWritten(BLEDevice central, BLECharacteristic characteristic) {
-  bt_mode = modeChar.value();
+  //bt_mode = modeChar.value();
   //Serial.print("Mode written to: ");
   //Serial.println(bt_mode);
+  /*
   if (bt_motor == 0) {
     left_motor.changeMode(bt_mode);
   } else if (bt_motor == 1) {
     //Serial.println("Right motor mode changed");
     //right_motor.changeMode(bt_mode);
   }
+  */
 }
 
 void motorWritten(BLEDevice central, BLECharacteristic characteristic) {
-  bt_motor = motorChar.value();
+  //bt_motor = motorChar.value();
   //Serial.print("Motor written to: ");
   //Serial.println(bt_motor);
   //Update new motor with global variables (not setpoint)
+  /*
   if (bt_motor == 0) {
     left_motor.changeMode(bt_mode);
     if (bt_enable) {
@@ -116,4 +138,5 @@ void motorWritten(BLEDevice central, BLECharacteristic characteristic) {
       //right_motor.disableMotor();
     }
   }
+  */
 }

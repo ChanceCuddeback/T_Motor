@@ -2,121 +2,229 @@
  * Uses an Arduino Nano 33 BLE Sense and Seeed studios Serial-CAN transciever
  * t_ret = kp(p_des-p_real) + kd(V_des-V_real) + t_in
  */
- 
 #include"BTFuncs.h"
-#include"TMotor.h"
+#include"MotorController.h"
+#include"Globals.h"
 
-#define WAIT_TIME 50
-const long unsigned int LEFT_MOTOR_ID = 1;
-const long unsigned int RIGHT_MOTOR_ID = 2;
-
-//Global Vars to interface bluetooth and motor instances
-int bt_mode =       0;    //0: Position, 1: Velocity, 2: Torque
-int bt_motor =      0;    //0: Left, 1: Right 
-bool bt_enable =    0;
-float bt_setpoint = 0;
-
+//Declare Global Motor Instance
+MotorController motor = MotorController();
 
 //Time keeping
 unsigned long int startMillis;
 unsigned long int currentMillis;
 
-//Declare Global Motor Instance(s)
-TMotor left_motor = TMotor();
-//TMotor right_motor = TMotor();
+float kp = KP_DEF;
+float kd = KD_DEF;
+float pos = 0;
+float vel = 0;
+float tor = 0;
+unsigned long int using_id = LEFT_MOTOR_ID;
+bool enable = false;
 
+void modify_pos();
+void modify_vel();
+void modify_tor();
 
 void setup() {
   Serial.begin(115200);
-  while (!Serial) {};
-  delay(1000);
-  //Serial.println("Begin!");
-  left_motor.init(LEFT_MOTOR_ID, true);
-  setupBLE();
-  //Serial.println("Done!");
+  delay(500);
+  motor.init();
+  motor.enableMotor(using_id,enable);
+  //setupBLE();
   startMillis = millis();
 }
 
 
 void loop() {
-  BLE.poll();
+  //BLE.poll();
   currentMillis = millis();
   if (currentMillis - startMillis > WAIT_TIME) {
     //Serial.println("Getting data from motor!");
-    left_motor.handleReply(true);
+    //motor.handleReply(true);
     startMillis = currentMillis;
-    //Serial.println("Done getting Data!");
   }
-  /*
-  while (Serial.available()) {
+  unsigned int command = 0;
+  if (Serial.available()) {
     command = Serial.read();
-    float p_step = 0.01;
     switch (command) {
-      case '1':
-        p_in = p_in + p_step;
-        Serial.println("Increase Step.");
+      case 'k':
+        collect_constants();
         break;
-      case '2':
-        Serial.println("Beware of Torque!");
-        delay(1000);
-        t_in = 5;
-        pack_cmd();
-        delay(1000);
-        t_in = 0;
-        pack_cmd();
+      case 'p':
+        Serial.println("Changing Postion!");
+        modify_pos();
         break;
-      case '3':
-        EnterMotorMode();
-        Serial.println("Began Motor Mode!");
+      case 'v':
+        Serial.println("Changing Velocity!");
+        modify_vel();
         break;
-      case '4':
-        ExitMotorMode();
-        Serial.println("Stopped Motor Mode!");
+      case 't':
+        Serial.println("Changing Torque!");
+        modify_tor();
         break;
-      case '5':
-        setZero();
-        Serial.println("Zero Motor");
+      case 'o':
+        Serial.println("Setting Zero...");
+        motor.setZero(using_id);
         break;
-      case '6':
-        pack_cmd();
-        Serial.println("Sent Command");
+      case 'M':
+        Serial.println("Changing enable state!");
+        enable = !enable;
+        motor.enableMotor(using_id, enable);
         break;
-      case '7':
-        if (motor_on) 
-        {
-          Serial.println("Start Pos Ramp Sequence!");
-          for (int i=0;i<85;i++)
-          {
-            p_in=p_in + p_step;
-            pack_cmd();
-            Serial.print("p_in: ");
-            Serial.println(p_in);
-            Serial.print("i: ");
-            Serial.println(i);
-            delay(1);
-          }
-        }
-        else 
-        {
-          Serial.println("Motor must be on!");
-        }
+      case 'u':
+        Serial.println("Updating...");
+        motor.send_command(using_id, pos, vel, kp, kd, tor);
         break;
-      case '8':
-        sendZero();
-        break;
+       
+    }
+    Serial.flush(); 
+  }
+}
+
+void collect_constants() {
+  Serial.println("Collecting Constants.");
+  bool done = false;
+  bool got_kp = false;
+  Serial.flush();
+  
+  while (!done) {
+    while (Serial.available()) {
+      float data = Serial.read();
+      if (got_kp) {
+        kd = data;
+        Serial.print("Kd: ");
+        Serial.println(kd);
+        done = true;
+        motor.send_command(using_id, pos, vel, kp, kd, tor);
+      } else {
+        kp = data;
+        got_kp = true;
+        Serial.print("Kp: ");
+        Serial.println(kp);
+      }
     } 
   }
-  if (motor_on) 
-  {
-    pack_cmd();
-  }
-  
-  
-  if (can.recv(&can_id, data) == '1') {
-    unpack_reply();
-  }
-  */
 }
+
+void modify_pos() {
+  bool done = false;
+  while (!done) {
+    if (Serial.available()) {
+      int data = Serial.read();
+      if (char(data) == '~') {
+        Serial.println("Exiting...");
+        done = true;
+        return; 
+      }
+      if (char(data) == '+') {
+        Serial.print("Adding...");
+        pos += 1;
+        motor.send_command(using_id, pos, vel, kp, kd, tor);
+        Serial.println("Command sent!");
+      }
+      if (char(data) == '-') {
+        Serial.println("Subtracting...");
+        pos -= 1;
+        motor.send_command(using_id, pos, vel, kp, kd, tor);
+        Serial.println("Command sent!");
+      }
+    }
+  }
+}
+
+void modify_vel() {
+  bool done = false;
+  while (!done) {
+    if (Serial.available()) {
+      int data = Serial.read();
+      if (char(data) == '~') {
+        Serial.println("Exiting...");
+        done = true;
+        return; 
+      }
+      if (char(data) == '+') {
+        Serial.print("Adding...");
+        vel += 10;
+        motor.send_command(using_id, pos, vel, kp, kd, tor);
+        Serial.println("Command sent!");
+      }
+      if (char(data) == '-') {
+        Serial.println("Subtracting...");
+        vel -= 10;
+        motor.send_command(using_id, pos, vel, kp, kd, tor);
+        Serial.println("Command sent!");
+      }
+    }
+  }
+}
+
+void modify_tor() {
+  bool done = false;
+  while (!done) {
+    if (Serial.available()) {
+      int data = Serial.read();
+      if (char(data) == '~') {
+        Serial.println("Exiting...");
+        done = true;
+        return; 
+      }
+      if (char(data) == '+') {
+        Serial.print("Adding...");
+        tor += 1;
+        motor.send_command(using_id, pos, vel, kp, kd, tor);
+        Serial.println("Command sent!");
+      }
+      if (char(data) == '-') {
+        Serial.println("Subtracting...");
+        tor -= 1;
+        motor.send_command(using_id, pos, vel, kp, kd, tor);
+        Serial.println("Command sent!");
+      }
+    }
+  }
+}
+
+void modify_x(int x) {
+  bool done = false;
+  while (!done) {
+    if (Serial.available()) {
+      int data = Serial.read();
+      if (char(data) == '~') {
+        Serial.println("Exiting...");
+        done = true;
+        return; 
+      }
+      if (char(data) == '+') {
+        Serial.print("Adding...");
+        switch (x) {
+        case 1:
+          pos += 1;
+        case 2:
+          vel += 1;
+        case 3:
+          tor += 1;
+        }
+        motor.send_command(using_id, pos, vel, kp, kd, tor);
+        Serial.println("Command sent!");
+      }
+      if (char(data) == '-') {
+        Serial.println("Subtracting...");
+        switch (x) {
+        case 1:
+          pos -= 1;
+        case 2:
+          vel -= 1;
+        case 3:
+          tor -= 1;
+        }
+        motor.send_command(using_id, pos, vel, kp, kd, tor);
+        Serial.println("Command sent!");
+      }
+    }
+  }
+}
+
+
   /*
   void EnterMotorMode()
   {
