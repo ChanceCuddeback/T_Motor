@@ -1,7 +1,8 @@
 #ifndef MOTOR_H
 #define MOTOR_H
 
-#include"Serial_CAN_Nano.h"
+#include "Serial_CAN_Nano.h"
+#include "SPI_CAN_Nano.h"
 
 //Motor max/mins
 #define P_MIN -12.5f

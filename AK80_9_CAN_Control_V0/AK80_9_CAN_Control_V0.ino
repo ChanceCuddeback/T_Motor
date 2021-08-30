@@ -102,7 +102,7 @@ void collect_constants() {
         Serial.print("Kp: ");
         Serial.println(kp);
       }
-    } 
+    }
   }
 }
 
