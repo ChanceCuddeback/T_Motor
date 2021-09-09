@@ -75,7 +75,6 @@ void loop() {
         Serial.println("Updating...");
         motor.send_command(using_id, pos, vel, kp, kd, tor);
         break;
-       
     }
     Serial.flush(); 
   }

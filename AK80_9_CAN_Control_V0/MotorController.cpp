@@ -2,23 +2,24 @@
 
 //Public interface
 void MotorController::init() {
-  sender = Serial_CAN();
-  sender.begin(CAN_RATE);
+  sender_obj = SPI_CAN();
+  sender = &sender_obj;
+  sender->begin(CAN_RATE);
 }
 
 void MotorController::enableMotor(unsigned long int id, bool enable) {
   if (enable) {
   unsigned char enable_data[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC};
-  sender.send(id, 0, 0, 8, enable_data);
+  sender->send(id, 0, 0, 8, enable_data);
   } else {
     unsigned char disable_data[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFD};
-    sender.send(id, 0, 0, 8, disable_data);
+    sender->send(id, 0, 0, 8, disable_data);
   }
 }
 
 void  MotorController::setZero(unsigned long int id) {
   unsigned char zero_data[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE};
-  sender.send(id, 0, 0, 8, zero_data);
+  sender->send(id, 0, 0, 8, zero_data);
 }
 
 void MotorController::send_command(unsigned long int id, float p_des, float v_des, float kp, float kd, float t_des) {
@@ -51,7 +52,7 @@ void MotorController::send_command(unsigned long int id, float p_des, float v_de
   buf[6] = ((kd_int & 0xF) << 4) | (t_int >> 8);
   buf[7] = t_int & 0xFF;
   //Send CAN message
-  sender.send(id, 0, 0, 8, buf);
+  sender->send(id, 0, 0, 8, buf);
 }
 
 void MotorController::recv_command(unsigned long int id, float* buffer) {
@@ -59,13 +60,13 @@ void MotorController::recv_command(unsigned long int id, float* buffer) {
   bool found{false};
   unsigned char data[8];
   for (int i=0;i<=N_MOTORS;i++) {
-    if (!found && (sender.recv(&recv_id, data)=='1')) {
+    if (!found && (sender->recv(&recv_id, data)=='1')) {
       if (recv_id == id) {
         found = true;
       }
     }
   }
-  if (sender.recv(&recv_id, data) == '1') {
+  if (sender->recv(&recv_id, data) == '1') {
     if (recv_id == id) {
       //Unpack buffer
       long unsigned int ID = data[0];

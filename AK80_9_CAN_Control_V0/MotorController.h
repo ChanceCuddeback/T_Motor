@@ -36,7 +36,8 @@ class MotorController {
     void    unpack_reply(bool);
     float   float_to_uint(float, float, float, int);
     float   uint_to_float(unsigned int, float, float, int);
-    Serial_CAN sender;
+    SPI_CAN *sender;
+    SPI_CAN sender_obj;
 };
 
 #endif
